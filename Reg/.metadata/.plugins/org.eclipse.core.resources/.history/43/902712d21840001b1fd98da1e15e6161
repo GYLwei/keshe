@@ -1,0 +1,118 @@
+package Home;
+
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.jasper.tagplugins.jstl.core.Out;
+
+/**
+ * Servlet implementation class Tools
+ */
+@WebServlet("/Tools")
+public class Tools extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Default constructor.
+	 */
+	public Tools() {
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		String paString = request.getParameter("Method").toString();
+		if (paString.equals("SendRan")) {
+			String ph = request.getParameter("PhoneNum").toString();
+			String Ran = ranString();
+			// SendMess(ph, Ran);
+			// dic.put(ph, Ran);
+			dic.put("15327421391", "429623");
+		} else {
+			String phoneNumString = request.getParameter("Username").toString();
+			String passWordString = request.getParameter("Password").toString();
+			String TransRan = request.getParameter("Ran").toString();
+			String bString = dic.get(phoneNumString);
+			if (bString.equals(TransRan)) {
+				// 相等 则注册成功
+				System.out.println("注册成功" + bString + "::" + TransRan);
+				// response.getWriter().print("<script> alert('注册成功!'); </script>");
+			} else {
+				// Out.print("<script> alert(\"验证码错误!\"); </script>");
+				System.out.println("注册失败" + bString + "::" + TransRan);
+				response.getWriter().print("<script> alert('验证码错误!'); </script>");
+			}
+			// System.out.println(phoneNumString + passWordString + TransRan);
+		}
+
+		doGet(request, response);
+	}
+
+	HashMap<String, String> dic = new HashMap<String, String>();
+
+	private void SendMess(String PhoneNumber, String ranString) {
+		try {
+			HttpClient client = new HttpClient();
+			PostMethod post = new PostMethod("http://gbk.api.smschinese.cn");
+			post.addRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=gbk");
+			NameValuePair[] data = { new NameValuePair("Uid", "liwei233"),
+					new NameValuePair("Key", "d41d8cd98f00b204e980"), new NameValuePair("smsMob", PhoneNumber),
+					new NameValuePair("smsText", "【李伟中文网】您的短信验证码是:" + ranString) };
+			post.setRequestBody(data);
+
+			client.executeMethod(post);
+			Header[] headers = post.getResponseHeaders();
+			int statcode = post.getStatusCode(); // 返回状态码 检测短信是否发送成功
+			System.out.println("状态码:" + statcode);
+
+			for (Header h : headers) {
+				System.out.println(h.toString());
+			}
+			String result = new String(post.getResponseBodyAsString().getBytes("gbk"));
+			System.out.println(result); // 打印返回消息状态
+
+			post.releaseConnection();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+	}
+
+	public String ranString() {
+		int n = 0;
+		while (n < 100000) {
+			n = (int) (Math.random() * 1000000);
+		}
+		return Integer.toString(n);
+
+	}
+}
